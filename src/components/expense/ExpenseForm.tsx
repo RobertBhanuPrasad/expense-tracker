@@ -123,7 +123,7 @@ export function ExpenseForm({ onSubmit, isLoading, isDialog }: ExpenseFormProps)
             Amount <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
               <IndianRupee className="h-4 w-4" />
             </div>
             <Input
@@ -134,7 +134,7 @@ export function ExpenseForm({ onSubmit, isLoading, isDialog }: ExpenseFormProps)
               value={formData.amount}
               onChange={handleAmountChange}
               className={cn(
-                "input-currency text-base",
+                "input-currency text-base pl-8",
                 errors.amount && "border-destructive focus-visible:ring-destructive"
               )}
               disabled={isLoading}

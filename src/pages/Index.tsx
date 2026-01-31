@@ -37,7 +37,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
           {/* Left Panel - Charts */}
           <div className="lg:col-span-5 h-full">
-            <ExpenseCharts expenses={allExpenses} />
+            <ExpenseCharts expenses={allExpenses} isLoading={isLoading} />
           </div>
 
           {/* Right Panel - List */}

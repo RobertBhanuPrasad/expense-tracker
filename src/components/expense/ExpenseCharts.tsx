@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ExpenseChartsSkeleton } from './ExpenseChartsSkeleton';
 import {
   BarChart,
   Bar,
@@ -16,6 +17,7 @@ import { Expense, ExpenseCategory } from '@/types/expense';
 
 interface ExpenseChartsProps {
   expenses: Expense[];
+  isLoading?: boolean;
 }
 
 const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
@@ -36,7 +38,10 @@ const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   Other: 'Other',
 };
 
-export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
+export function ExpenseCharts({ expenses, isLoading }: ExpenseChartsProps) {
+  if (isLoading) {
+    return <ExpenseChartsSkeleton />;
+  }
   const chartData = useMemo(() => {
     const categoryTotals: Record<ExpenseCategory, number> = {
       Food: 0,
@@ -113,7 +118,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            No expense data to display
+            {" "}
           </div>
         )}
       </div>
@@ -163,7 +168,7 @@ export function ExpenseCharts({ expenses }: ExpenseChartsProps) {
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            No expense data to display
+            {" "}
           </div>
         )}
       </div>

@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Personal Expense Tracker - Fintech Design System
+   Clean, modern, professional with emerald accents
+*/
+
+
+@layer base {
+  :root {
+    /* Soft neutral background */
+    --background: 210 20% 98%;
+    --foreground: 220 20% 10%;
+
+    /* Cards - pure white with depth */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    /* Emerald primary - fintech accent */
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Soft secondary */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 220 20% 25%;
+
+    /* Muted elements */
+    --muted: 210 15% 94%;
+    --muted-foreground: 220 10% 50%;
+
+    /* Accent - lighter emerald */
+    --accent: 160 60% 95%;
+    --accent-foreground: 160 84% 30%;
+
+    /* Status colors */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 15%;
+
+    /* Form elements */
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 160 84% 39%;
+
+    --radius: 0.75rem;
+
+    /* Category colors */
+    --category-food: 25 95% 53%;
+    --category-travel: 199 89% 48%;
+    --category-rent: 270 70% 60%;
+    --category-shopping: 330 80% 60%;
+    --category-utilities: 45 93% 47%;
+    --category-other: 220 10% 60%;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 10% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 20% 10% / 0.08), 0 2px 4px -2px hsl(220 20% 10% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(220 20% 10% / 0.08), 0 4px 6px -4px hsl(220 20% 10% / 0.05);
+    --shadow-card: 0 1px 3px 0 hsl(220 20% 10% / 0.05), 0 1px 2px -1px hsl(220 20% 10% / 0.05);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 160 60% 95%;
+    --sidebar-accent-foreground: 160 84% 30%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 160 84% 39%;
+  }
+
+  .dark {
+    --background: 220 20% 8%;
+    --foreground: 210 20% 98%;
+
+    --card: 220 20% 12%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 160 70% 50%;
+    --primary-foreground: 220 20% 8%;
+
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 160 40% 20%;
+    --accent-foreground: 160 70% 60%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 160 70% 50%;
+
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 160 70% 50%;
+    --sidebar-primary-foreground: 220 20% 8%;
+    --sidebar-accent: 160 40% 20%;
+    --sidebar-accent-foreground: 160 70% 60%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 160 70% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer components {
+  .card-elevated {
+    @apply bg-card rounded-xl border border-border;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-elevated-hover {
+    @apply card-elevated transition-all duration-200;
+  }
+
+  .card-elevated-hover:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .category-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .category-food {
+    @apply bg-orange-100 text-orange-700;
+  }
+
+  .category-travel {
+    @apply bg-sky-100 text-sky-700;
+  }
+
+  .category-rent {
+    @apply bg-violet-100 text-violet-700;
+  }
+
+  .category-shopping {
+    @apply bg-pink-100 text-pink-700;
+  }
+
+  .category-utilities {
+    @apply bg-amber-100 text-amber-700;
+  }
+
+  .category-other {
+    @apply bg-slate-100 text-slate-600;
+  }
+
+  .input-currency {
+    @apply pl-8;
+  }
+
+  .stat-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold;
+    @apply bg-primary/10 text-primary;
+  }
+
+  .skeleton-shimmer {
+    @apply animate-pulse bg-muted rounded;
+  }
+
+  .filter-bar {
+    @apply sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-3 -mx-1 px-1;
+    @apply border-b border-border/50;
+  }
+
+  .amount-display {
+    @apply font-semibold tabular-nums;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

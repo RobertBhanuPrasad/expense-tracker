@@ -1,42 +1,18 @@
-import { useState, useCallback, useMemo } from 'react';
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Expense, ExpenseCategory, ExpenseFormData } from '@/types/expense';
 import { toast } from '@/hooks/use-toast';
 
-const STORAGE_KEY = 'expense-tracker-expenses';
+const API_URL = import.meta.env.VITE_API_URL ;
+
+// Form data helpers (optional, keep if you want to persist form state)
 const FORM_STORAGE_KEY = 'expense-tracker-form';
-
-// Generate unique ID
-const generateId = () => crypto.randomUUID();
-
-// Load expenses from localStorage
-const loadExpenses = (): Expense[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
-
-// Save expenses to localStorage
-const saveExpenses = (expenses: Expense[]) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
-  } catch (error) {
-    console.error('Failed to save expenses:', error);
-  }
-};
-
-// Load saved form data
 export const loadFormData = (): Partial<ExpenseFormData> | null => {
   try {
     const stored = localStorage.getItem(FORM_STORAGE_KEY);
     if (stored) {
       const data = JSON.parse(stored);
-      // Convert date string back to Date object
-      if (data.date) {
-        data.date = new Date(data.date);
-      }
+      if (data.date) data.date = new Date(data.date);
       return data;
     }
     return null;
@@ -44,8 +20,6 @@ export const loadFormData = (): Partial<ExpenseFormData> | null => {
     return null;
   }
 };
-
-// Save form data
 export const saveFormData = (data: Partial<ExpenseFormData>) => {
   try {
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
@@ -53,8 +27,6 @@ export const saveFormData = (data: Partial<ExpenseFormData>) => {
     console.error('Failed to save form data:', error);
   }
 };
-
-// Clear form data
 export const clearFormData = () => {
   try {
     localStorage.removeItem(FORM_STORAGE_KEY);
@@ -65,108 +37,117 @@ export const clearFormData = () => {
 
 export type SortOrder = 'newest' | 'oldest';
 
+
 export function useExpenses() {
-  const [expenses, setExpenses] = useState<Expense[]>(loadExpenses);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
 
-  // Simulate network delay for realistic UX
-  const simulateNetworkDelay = () => 
-    new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+  // Fetch all expenses from backend
+  const fetchExpenses = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/expenses`);
+      const data = await res.json();
+      // Convert backend format to frontend Expense type
+      setExpenses(
+        data.map((e: any) => ({
+          id: e._id,
+          amount: e.amount,
+          category: e.category,
+          description: e.title || e.description || '',
+          date: e.date,
+          createdAt: e.createdAt || e.date,
+        }))
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      toast({
+        title: 'Failed to fetch expenses',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   // Add new expense
   const addExpense = useCallback(async (formData: ExpenseFormData): Promise<boolean> => {
     setIsLoading(true);
-    
     try {
-      // Simulate network request
-      await simulateNetworkDelay();
-      
-      // Validate
-      const amount = parseFloat(formData.amount);
-      if (isNaN(amount) || amount <= 0) {
-        throw new Error('Invalid amount');
-      }
-      
-      if (!formData.date) {
-        throw new Error('Date is required');
-      }
+      const amount = Number.parseFloat(formData.amount);
+      if (Number.isNaN(amount) || amount <= 0) throw new Error('Invalid amount');
+      if (!formData.date) throw new Error('Date is required');
 
-      const newExpense: Expense = {
-        id: generateId(),
-        amount,
-        category: formData.category,
-        description: formData.description.trim(),
-        date: formData.date.toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-
-      setExpenses(prev => {
-        const updated = [newExpense, ...prev];
-        saveExpenses(updated);
-        return updated;
+      const res = await fetch(`${API_URL}/expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.description.trim(),
+          amount,
+          category: formData.category,
+          date: formData.date.toISOString(),
+        }),
       });
-
+      if (!res.ok) throw new Error('Failed to add expense');
+      await fetchExpenses();
       clearFormData();
-
       toast({
-        title: "Expense added",
+        title: 'Expense added',
         description: `₹${amount.toLocaleString('en-IN')} for ${formData.category}`,
       });
-
       return true;
     } catch (error) {
       toast({
-        title: "Failed to add expense",
-        description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+        title: 'Failed to add expense',
+        description: error instanceof Error ? error.message : 'Please try again',
+        variant: 'destructive',
       });
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchExpenses]);
 
   // Delete expense
   const deleteExpense = useCallback(async (id: string) => {
     setIsLoading(true);
-    
     try {
-      await simulateNetworkDelay();
-      
-      setExpenses(prev => {
-        const updated = prev.filter(e => e.id !== id);
-        saveExpenses(updated);
-        return updated;
-      });
-
+      const res = await fetch(`${API_URL}/expenses/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete expense');
+      await fetchExpenses();
       toast({
-        title: "Expense deleted",
-        description: "The expense has been removed",
+        title: 'Expense deleted',
+        description: 'The expense has been removed',
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
       toast({
-        title: "Failed to delete",
-        description: "Please try again",
-        variant: "destructive",
+        title: 'Failed to delete',
+        description: 'Please try again',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchExpenses]);
 
   // Filtered and sorted expenses
   const filteredExpenses = useMemo(() => {
     let result = [...expenses];
-    
-    // Apply category filter
     if (categoryFilter !== 'all') {
       result = result.filter(e => e.category === categoryFilter);
     }
-    
-    // Apply date filter
     if (dateFilter) {
       const filterDateStr = dateFilter.toISOString().split('T')[0];
       result = result.filter(e => {
@@ -174,22 +155,16 @@ export function useExpenses() {
         return expenseDateStr === filterDateStr;
       });
     }
-    
-    // Apply sort
     result.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-    
     return result;
   }, [expenses, categoryFilter, dateFilter, sortOrder]);
 
   // Total of filtered expenses
-  const total = useMemo(() => 
-    filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
-    [filteredExpenses]
-  );
+  const total = useMemo(() => filteredExpenses.reduce((sum, e) => sum + e.amount, 0), [filteredExpenses]);
 
   // Category totals for summary
   const categoryTotals = useMemo(() => {
@@ -201,11 +176,9 @@ export function useExpenses() {
       Utilities: 0,
       Other: 0,
     };
-    
     expenses.forEach(e => {
       totals[e.category] += e.amount;
     });
-    
     return totals;
   }, [expenses]);
 
